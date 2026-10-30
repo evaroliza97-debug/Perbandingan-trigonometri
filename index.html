@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MPI Matematika: Perbandingan Trigonometri</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1E40AF', // Blue 800
+                        secondary: '#3B82F6', // Blue 500
+                        accent: '#F97316', // Orange 500
+                        accentHover: '#EA580C', // Orange 600
+                        lightBg: '#F8FAFC'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom Styles & Glassmorphism */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .tab-btn.active {
+            background-color: #F97316;
+            color: #ffffff;
+            box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.4);
+        }
+
+        /* Responsive Canvas Container */
+        #sim-canvas {
+            touch-action: none;
+            background-color: #ffffff;
+            border-radius: 0.75rem;
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="text-slate-800 min-h-screen flex flex-col justify-between">
+
+    <!-- HEADER / NAVIGATION BAR -->
+    <header class="bg-primary text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo & Title -->
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('home')">
+                    <div class="bg-accent p-2 rounded-lg text-white font-bold text-xl flex items-center justify-center w-10 h-10 shadow">
+                        &Delta;
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-lg sm:text-xl leading-tight">TrigoEdu</h1>
+                        <p class="text-xs text-blue-200 hidden sm:block">Matematika SMA Kelas X</p>
+                    </div>
+                </div>
+
+                <!-- Navigation Links (Desktop) -->
+                <nav class="hidden md:flex space-x-1 lg:space-x-2 text-sm font-medium">
+                    <button onclick="switchTab('home')" id="nav-home" class="tab-btn px-3 py-2 rounded-md transition hover:bg-blue-700">Beranda</button>
+                    <button onclick="switchTab('guide')" id="nav-guide" class="tab-btn px-3 py-2 rounded-md transition hover:bg-blue-700">Petunjuk</button>
+                    <button onclick="switchTab('objective')" id="nav-objective" class="tab-btn px-3 py-2 rounded-md transition hover:bg-blue-700">Tujuan</button>
+                    <button onclick="switchTab('material')" id="nav-material" class="tab-btn px-3 py-2 rounded-md transition hover:bg-blue-700">Materi</button>
+                    <button onclick="switchTab('simulation')" id="nav-simulation" class="tab-btn px-3 py-2 rounded-md transition hover:bg-blue-700">Simulasi</button>
+                    <button onclick="switchTab('practice')" id="nav-practice" class="tab-btn px-3 py-2 rounded-md transition hover:bg-blue-700">Latihan</button>
+                    <button onclick="switchTab('evaluation')" id="nav-evaluation" class="tab-btn px-3 py-2 rounded-md transition hover:bg-blue-700">Evaluasi</button>
+                    <button onclick="switchTab('profile')" id="nav-profile" class="tab-btn px-3 py-2 rounded-md transition hover:bg-blue-700">Profil</button>
+                </nav>
+
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-btn" onclick="toggleMobileMenu()" class="p-2 rounded-md text-blue-100 hover:text-white hover:bg-blue-700 focus:outline-none">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path id="menu-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Dropdown -->
+        <div id="mobile-menu" class="hidden md:hidden bg-blue-900 px-2 pt-2 pb-3 space-y-1 sm:px-3 text-sm">
+            <button onclick="switchTab('home')" class="block w-full text-left px-3 py-2 rounded-md hover:bg-blue-800">Beranda</button>
+            <button onclick="switchTab('guide')" class="block w-full text-left px-3 py-2 rounded-md hover:bg-blue-800">Petunjuk</button>
+            <button onclick="switchTab('objective')" class="block w-full text-left px-3 py-2 rounded-md hover:bg-blue-800">Tujuan</button>
+            <button onclick="switchTab('material')" class="block w-full text-left px-3 py-2 rounded-md hover:bg-blue-800">Materi</button>
+            <button onclick="switchTab('simulation')" class="block w-full text-left px-3 py-2 rounded-md hover:bg-blue-800">Simulasi</button>
+            <button onclick="switchTab('practice')" class="block w-full text-left px-3 py-2 rounded-md hover:bg-blue-800">Latihan</button>
+            <button onclick="switchTab('evaluation')" class="block w-full text-left px-3 py-2 rounded-md hover:bg-blue-800">Evaluasi</button>
+            <button onclick="switchTab('profile')" class="block w-full text-left px-3 py-2 rounded-md hover:bg-blue-800">Profil</button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full">
+
+        <!-- 1. HALAMAN PEMBUKA (HOME) -->
+        <section id="section-home" class="content-section">
+            <div class="glass-card rounded-2xl p-6 md:p-12 shadow-xl grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="space-y-6">
+                    <span class="inline-block px-3 py-1 bg-blue-100 text-primary font-semibold text-xs md:text-sm rounded-full">Media Pembelajaran Interaktif (MPI)</span>
+                    <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-primary leading-tight">
+                        Mengenal Perbandingan <span class="text-accent">Trigonometri</span>
+                    </h1>
+                    <p class="text-slate-600 text-base sm:text-lg">
+                        Belajar konsep Sinus (sin), Cosinus (cos), dan Tangen (tan) pada Segitiga Siku-siku dengan cara visual, interaktif, dan menyenangkan!
+                    </p>
+                    
+                    <div class="p-4 bg-slate-50 border-l-4 border-accent rounded-r-lg text-sm text-slate-700">
+                        <p class="font-semibold">Mata Pelajaran: Matematika</p>
+                        <p>Jenjang / Kelas: SMA / Kelas X</p>
+                    </div>
+
+                    <div class="pt-2">
+                        <button onclick="switchTab('material')" class="bg-accent hover:bg-accentHover text-white font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition duration-300 transform hover:-translate-y-1 flex items-center space-x-3 text-lg w-full sm:w-auto justify-center">
+                            <span>Mulai Belajar</span>
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 12h14"></path></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Interactive SVG Triangle Visual -->
+                <div class="flex justify-center items-center p-4">
+                    <div class="w-full max-w-md bg-blue-50 p-6 rounded-2xl border border-blue-100 shadow-inner text-center">
+                        <svg viewBox="0 0 300 220" class="w-full h-auto drop-shadow-md">
+                            <!-- Triangle -->
+                            <polygon points="40,180 260,180 260,40" fill="#E0F2FE" stroke="#1E40AF" stroke-width="4" stroke-linejoin="round"/>
+                            <!-- Right angle mark -->
+                            <path d="M 240 180 L 240 160 L 260 160" fill="none" stroke="#1E40AF" stroke-width="3"/>
+                            <!-- Angle Theta Arc -->
+                            <path d="M 80 180 A 40 40 0 0 0 71 158" fill="none" stroke="#F97316" stroke-width="3"/>
+                            <text x="90" y="170" fill="#F97316" font-weight="bold" font-size="16">&theta;</text>
+                            
+                            <!-- Labels -->
+                            <text x="150" y="205" fill="#1E40AF" font-weight="bold" text-anchor="middle" font-size="14">Sisi Samping (sa)</text>
+                            <text x="275" y="115" fill="#1E40AF" font-weight="bold" text-anchor="middle" font-size="14" transform="rotate(90 275 115)">Sisi Depan (de)</text>
+                            <text x="140" y="100" fill="#F97316" font-weight="bold" text-anchor="middle" font-size="14" transform="rotate(-32 140 100)">Sisi Miring / Hipotenusa (mi)</text>
+                        </svg>
+                        <p class="text-xs text-slate-500 mt-2 font-medium">Ilustrasi Segitiga Siku-Siku dengan Sudut Acuan (&theta;)</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. MENU PETUNJUK PENGGUNAAN -->
+        <section id="section-guide" class="content-section hidden">
+            <div class="glass-card rounded-2xl p-6 md:p-8 shadow-md space-y-6">
+                <div class="border-b pb-4">
+                    <h2 class="text-2xl font-bold text-primary flex items-center space-x-2">
+                        <span>📖</span> <span>Petunjuk Penggunaan Media</span>
+                    </h2>
+                    <p class="text-slate-600 text-sm mt-1">Panduan navigasi dan pemanfaatan fitur-fitur media pembelajaran interaktif.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="flex items-start space-x-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                        <div class="bg-blue-100 text-primary p-3 rounded-lg font-bold text-xl">1</div>
+                        <div>
+                            <h3 class="font-bold text-slate-800">Navigasi Utama</h3>
+                            <p class="text-sm text-slate-600 mt-1">Gunakan bilah navigasi di bagian atas layar untuk berpindah antar menu (Materi, Simulasi, Latihan, Evaluasi, dll.) secara bebas.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start space-x-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                        <div class="bg-blue-100 text-primary p-3 rounded-lg font-bold text-xl">2</div>
+                        <div>
+                            <h3 class="font-bold text-slate-800">Menu Materi</h3>
+                            <p class="text-sm text-slate-600 mt-1">Pelajari konsep dasar perbandingan trigonometri, penjelasan sisi segitiga, rumus utama, serta contoh soal kontekstual.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start space-x-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                        <div class="bg-orange-100 text-accent p-3 rounded-lg font-bold text-xl">3</div>
+                        <div>
+                            <h3 class="font-bold text-slate-800">Simulasi Interaktif</h3>
+                            <p class="text-sm text-slate-600 mt-1">Gelar eksperimen dengan menggeser *slider* besar sudut. Amati perubahan panjang sisi dan nilai rasio sin, cos, dan tan secara langsung.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start space-x-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                        <div class="bg-orange-100 text-accent p-3 rounded-lg font-bold text-xl">4</div>
+                        <div>
+                            <h3 class="font-bold text-slate-800">Latihan Soal</h3>
+                            <p class="text-sm text-slate-600 mt-1">Uji pemahaman awal Anda pada 5 soal latihan. Sistem memberikan umpan balik (salah/benar) dan pembahasan instan.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start space-x-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                        <div class="bg-green-100 text-green-700 p-3 rounded-lg font-bold text-xl">5</div>
+                        <div>
+                            <h3 class="font-bold text-slate-800">Evaluasi Mandiri</h3>
+                            <p class="text-sm text-slate-600 mt-1">Kerjakan 10 soal evaluasi untuk mengukur capaian belajar. Skor akhir dan status ketuntasan akan dihitung secara otomatis.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start space-x-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                        <div class="bg-purple-100 text-purple-700 p-3 rounded-lg font-bold text-xl">6</div>
+                        <div>
+                            <h3 class="font-bold text-slate-800">Suara / Audio</h3>
+                            <p class="text-sm text-slate-600 mt-1">Aplikasi dilengkapi dengan efek audio interaktif saat menjawab soal atau menggeser tombol untuk pengalaman belajar optimal.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. MENU TUJUAN PEMBELAJARAN -->
+        <section id="section-objective" class="content-section hidden">
+            <div class="glass-card rounded-2xl p-6 md:p-8 shadow-md space-y-6">
+                <div class="border-b pb-4">
+                    <h2 class="text-2xl font-bold text-primary flex items-center space-x-2">
+                        <span>🎯</span> <span>Tujuan Pembelajaran</span>
+                    </h2>
+                    <p class="text-slate-600 text-sm mt-1">Capaian pembelajaran yang diharapkan setelah menggunakan media ini.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="p-5 bg-gradient-to-br from-blue-50 to-white rounded-xl border border-blue-200 shadow-sm hover:shadow-md transition">
+                        <div class="w-12 h-12 bg-blue-600 text-white rounded-xl flex items-center justify-center font-bold text-xl mb-4">01</div>
+                        <h3 class="font-bold text-slate-800 text-lg mb-2">Identifikasi Sisi</h3>
+                        <p class="text-sm text-slate-600">Peserta didik mampu mengidentifikasi sisi depan, sisi samping, dan sisi miring (hipotenusa) pada segitiga siku-siku berdasarkan sudut acuan.</p>
+                    </div>
+
+                    <div class="p-5 bg-gradient-to-br from-blue-50 to-white rounded-xl border border-blue-200 shadow-sm hover:shadow-md transition">
+                        <div class="w-12 h-12 bg-blue-600 text-white rounded-xl flex items-center justify-center font-bold text-xl mb-4">02</div>
+                        <h3 class="font-bold text-slate-800 text-lg mb-2">Konsep Trigonometri</h3>
+                        <p class="text-sm text-slate-600">Peserta didik dapat menjelaskan konsep dasar perbandingan sinus, cosinus, dan tangen secara tepat.</p>
+                    </div>
+
+                    <div class="p-5 bg-gradient-to-br from-blue-50 to-white rounded-xl border border-blue-200 shadow-sm hover:shadow-md transition">
+                        <div class="w-12 h-12 bg-blue-600 text-white rounded-xl flex items-center justify-center font-bold text-xl mb-4">03</div>
+                        <h3 class="font-bold text-slate-800 text-lg mb-2">Formulasi Rumus</h3>
+                        <p class="text-sm text-slate-600">Peserta didik dapat menuliskan rumus perbandingan trigonometri (sin, cos, tan) pada segitiga siku-siku dengan akurat.</p>
+                    </div>
+
+                    <div class="p-5 bg-gradient-to-br from-orange-50 to-white rounded-xl border border-orange-200 shadow-sm hover:shadow-md transition">
+                        <div class="w-12 h-12 bg-accent text-white rounded-xl flex items-center justify-center font-bold text-xl mb-4">04</div>
+                        <h3 class="font-bold text-slate-800 text-lg mb-2">Perhitungan Nilai</h3>
+                        <p class="text-sm text-slate-600">Peserta didik mampu menghitung nilai sinus, cosinus, dan tangen berdasarkan panjang sisi-sisi segitiga yang diketahui.</p>
+                    </div>
+
+                    <div class="p-5 bg-gradient-to-br from-orange-50 to-white rounded-xl border border-orange-200 shadow-sm hover:shadow-md transition lg:col-span-2">
+                        <div class="w-12 h-12 bg-accent text-white rounded-xl flex items-center justify-center font-bold text-xl mb-4">05</div>
+                        <h3 class="font-bold text-slate-800 text-lg mb-2">Penyelesaian Masalah Kontekstual</h3>
+                        <p class="text-sm text-slate-600">Peserta didik mampu menyelesaikan permasalahan nyata dalam kehidupan sehari-hari (seperti mengukur tinggi gedung, pohon, atau kemiringan tangga) menggunakan konsep trigonometri.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. MENU MATERI PEMBELAJARAN -->
+        <section id="section-material" class="content-section hidden">
+            <div class="glass-card rounded-2xl p-6 md:p-8 shadow-md space-y-8">
+                <!-- Header -->
+                <div class="border-b pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-primary">Materi Pembelajaran</h2>
+                        <p class="text-slate-600 text-sm">Perbandingan Trigonometri pada Segitiga Siku-Siku</p>
+                    </div>
+                    <!-- Navigation Sub-tabs -->
+                    <div class="flex flex-wrap gap-2 text-xs sm:text-sm">
+                        <button onclick="showSubMaterial('mat-1')" class="submat-btn px-3 py-1.5 rounded-lg bg-blue-100 text-primary font-semibold hover:bg-blue-200 transition active-submat" id="submat-btn-1">1. Pengertian</button>
+                        <button onclick="showSubMaterial('mat-2')" class="submat-btn px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 font-semibold hover:bg-blue-100 transition" id="submat-btn-2">2. Sisi Segitiga</button>
+                        <button onclick="showSubMaterial('mat-3')" class="submat-btn px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 font-semibold hover:bg-blue-100 transition" id="submat-btn-3">3. Rumus Utama</button>
+                        <button onclick="showSubMaterial('mat-4')" class="submat-btn px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 font-semibold hover:bg-blue-100 transition" id="submat-btn-4">4. Contoh Soal</button>
+                    </div>
+                </div>
+
+                <!-- Sub Material 1: Pengertian -->
+                <div id="mat-1" class="submat-content space-y-6">
+                    <div class="bg-blue-50 border-l-4 border-primary p-4 rounded-r-lg">
+                        <h3 class="text-lg font-bold text-primary mb-2">Apa itu Trigonometri?</h3>
+                        <p class="text-slate-700 leading-relaxed text-sm sm:text-base">
+                            <strong>Trigonometri</strong> berasal dari bahasa Yunani, yaitu <em>trigonon</em> (tiga sudut) dan <em>metron</em> (mengukur). Trigonometri adalah cabang ilmu matematika yang mempelajari hubungan antara panjang sisi dan besar sudut pada segitiga.
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                        <div class="space-y-3 text-slate-700 text-sm sm:text-base">
+                            <h4 class="font-bold text-slate-800 text-base">Segitiga Siku-Siku</h4>
+                            <p>
+                                Segitiga siku-siku adalah segitiga yang salah satu sudutnya besarnya <strong>90&deg;</strong> (sudut siku-siku). 
+                            </p>
+                            <p>
+                                Ciri utama segitiga siku-siku adalah berlaku <strong>Teorema Pythagoras</strong>:
+                            </p>
+                            <div class="p-3 bg-slate-100 rounded-lg text-center font-mono font-bold text-primary text-base">
+                                c<sup>2</sup> = a<sup>2</sup> + b<sup>2</sup>
+                            </div>
+                            <p class="text-xs text-slate-500">Di mana <em>c</em> adalah sisi miring (hipotenusa), sedangkan <em>a</em> dan <em>b</em> adalah sisi tegak lainnya.</p>
+                        </div>
+
+                        <div class="bg-white p-4 rounded-xl border shadow-sm flex justify-center">
+                            <svg viewBox="0 0 250 180" class="w-full max-w-xs h-auto">
+                                <polygon points="30,150 210,150 210,30" fill="#EFF6FF" stroke="#1E40AF" stroke-width="3"/>
+                                <path d="M 190 150 L 190 130 L 210 130" fill="none" stroke="#1E40AF" stroke-width="2"/>
+                                <text x="120" y="170" fill="#334155" font-size="12" text-anchor="middle">Sisi a (Alas)</text>
+                                <text x="225" y="90" fill="#334155" font-size="12" text-anchor="middle">Sisi b (Tinggi)</text>
+                                <text x="110" y="85" fill="#1E40AF" font-weight="bold" font-size="12" transform="rotate(-33 110 85)">Sisi c (Hipotenusa)</text>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sub Material 2: Sisi Depan, Samping, Miring -->
+                <div id="mat-2" class="submat-content hidden space-y-6">
+                    <h3 class="text-xl font-bold text-primary">Penentuan Sisi Berdasarkan Sudut Acuan (&theta;)</h3>
+                    <p class="text-slate-700 text-sm sm:text-base">
+                        Penamaan sisi segitiga siku-siku dalam trigonometri bersifat <strong>relatif</strong> terhadap posisi sudut acuan (&theta;) yang ditinjau.
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="p-4 bg-red-50 border border-red-200 rounded-xl">
+                            <h4 class="font-bold text-red-700 mb-1">1. Sisi Depan (de)</h4>
+                            <p class="text-xs sm:text-sm text-slate-600">Sisi yang berada tepat di <strong>depan</strong> sudut acuan &theta;.</p>
+                        </div>
+                        <div class="p-4 bg-green-50 border border-green-200 rounded-xl">
+                            <h4 class="font-bold text-green-700 mb-1">2. Sisi Samping (sa)</h4>
+                            <p class="text-xs sm:text-sm text-slate-600">Sisi yang berada di <strong>samping</strong> sudut acuan &theta; (selain sisi miring).</p>
+                        </div>
+                        <div class="p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                            <h4 class="font-bold text-blue-700 mb-1">3. Sisi Miring (mi)</h4>
+                            <p class="text-xs sm:text-sm text-slate-600">Sisi terpanjang yang berada tepat di <strong>depan sudut siku-siku (90&deg;)</strong>.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl flex items-center space-x-3 text-sm text-amber-800">
+                        <span class="text-2xl">💡</span>
+                        <p><strong>Ingat!</strong> Sisi miring (mi) posisinya selalu tetap di depan sudut 90&deg;, sedangkan sisi <em>depan (de)</em> dan <em>samping (sa)</em> dapat bertukar posisi tergantung sudut mana yang ditinjau.</p>
+                    </div>
+                </div>
+
+                <!-- Sub Material 3: Rumus Utama (Sini, Cos, Tan) -->
+                <div id="mat-3" class="submat-content hidden space-y-6">
+                    <h3 class="text-xl font-bold text-primary">Rumus Perbandingan Trigonometri</h3>
+                    <p class="text-slate-700 text-sm sm:text-base">Terdapat 3 perbandingan utama pada segitiga siku-siku. Mari kita gunakan jembatan keledai populer agar mudah dihafal:</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- SIN -->
+                        <div class="bg-white border-2 border-blue-500 rounded-2xl p-5 shadow-sm text-center relative overflow-hidden">
+                            <div class="bg-blue-500 text-white font-bold text-xs uppercase px-3 py-1 rounded-bl-lg absolute top-0 right-0">SIN-DE-MI</div>
+                            <h4 class="text-2xl font-extrabold text-blue-700 mb-2">Sinus (&theta;)</h4>
+                            <p class="text-sm text-slate-500 mb-4">Perbandingan Sisi Depan dengan Sisi Miring</p>
+                            <div class="bg-blue-50 p-4 rounded-xl text-lg font-bold text-blue-900 border border-blue-200">
+                                Sin &theta; = <span class="inline-block border-b-2 border-blue-900 px-2">Depan (de)</span> / <span class="inline-block px-2">Miring (mi)</span>
+                            </div>
+                        </div>
+
+                        <!-- COS -->
+                        <div class="bg-white border-2 border-green-500 rounded-2xl p-5 shadow-sm text-center relative overflow-hidden">
+                            <div class="bg-green-500 text-white font-bold text-xs uppercase px-3 py-1 rounded-bl-lg absolute top-0 right-0">COS-SA-MI</div>
+                            <h4 class="text-2xl font-extrabold text-green-700 mb-2">Cosinus (&theta;)</h4>
+                            <p class="text-sm text-slate-500 mb-4">Perbandingan Sisi Samping dengan Sisi Miring</p>
+                            <div class="bg-green-50 p-4 rounded-xl text-lg font-bold text-green-900 border border-green-200">
+                                Cos &theta; = <span class="inline-block border-b-2 border-green-900 px-2">Samping (sa)</span> / <span class="inline-block px-2">Miring (mi)</span>
+                            </div>
+                        </div>
+
+                        <!-- TAN -->
+                        <div class="bg-white border-2 border-orange-500 rounded-2xl p-5 shadow-sm text-center relative overflow-hidden">
+                            <div class="bg-orange-500 text-white font-bold text-xs uppercase px-3 py-1 rounded-bl-lg absolute top-0 right-0">TAN-DE-SA</div>
+                            <h4 class="text-2xl font-extrabold text-orange-700 mb-2">Tangen (&theta;)</h4>
+                            <p class="text-sm text-slate-500 mb-4">Perbandingan Sisi Depan dengan Sisi Samping</p>
+                            <div class="bg-orange-50 p-4 rounded-xl text-lg font-bold text-orange-900 border border-orange-200">
+                                Tan &theta; = <span class="inline-block border-b-2 border-orange-900 px-2">Depan (de)</span> / <span class="inline-block px-2">Samping (sa)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ringkasan Jembatan Keledai -->
+                    <div class="p-4 bg-slate-800 text-white rounded-xl text-center shadow">
+                        <p class="text-sm text-slate-300">Cara Mudah Menghafal:</p>
+                        <p class="text-lg font-bold tracking-wide mt-1 text-accent">
+                            "Demi (Sin = De/Mi) — Sami (Cos = Sa/Mi) — Desa (Tan = De/Sa)"
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Sub Material 4: Contoh Soal & Penerapan Kontekstual -->
+                <div id="mat-4" class="submat-content hidden space-y-6">
+                    <h3 class="text-xl font-bold text-primary">Contoh Soal Kontekstual</h3>
+
+                    <div class="bg-white border rounded-2xl p-6 shadow-sm space-y-4">
+                        <div class="flex items-start space-x-3">
+                            <span class="bg-accent text-white font-bold text-xs px-2.5 py-1 rounded-md">Soal 1</span>
+                            <div>
+                                <h4 class="font-bold text-slate-800">Mengukur Tinggi Pohon</h4>
+                                <p class="text-sm text-slate-600 mt-1">
+                                    Seorang siswa berdiri berjarak <strong>12 meter</strong> dari pangkal sebuah pohon. Ia melihat puncak pohon dengan sudut elevasi <strong>30&deg;</strong>. Berapakah tinggi pohon tersebut jika tinggi pengamatan diabaikan?
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 p-4 rounded-xl text-sm border space-y-2">
+                            <p class="font-bold text-primary">Pembahasan:</p>
+                            <ul class="list-disc list-inside text-slate-700 space-y-1">
+                                <li><strong>Diketahui:</strong> Sisi samping (jarak ke pohon) = 12 m, Sudut (&theta;) = 30&deg;</li>
+                                <li><strong>Ditanya:</strong> Tinggi pohon = Sisi depan (de)</li>
+                                <li><strong>Gunakan Rumus Tangen:</strong> Tan &theta; = Depan / Samping</li>
+                                <li class="font-mono bg-white p-2 rounded border my-2">
+                                    Tan 30&deg; = Tinggi / 12<br>
+                                    (1 / &radic;3) = Tinggi / 12 &rArr; (0,577) = Tinggi / 12<br>
+                                    Tinggi = 12 &times; 0,577 = <strong>6,93 meter</strong>
+                                </li>
+                                <li><strong>Jadi:</strong> Tinggi pohon tersebut adalah sekitar <strong>6,93 meter</strong> (atau 4&radic;3 meter).</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Pagination Button -->
+                <div class="pt-4 flex justify-between border-t">
+                    <button onclick="switchTab('objective')" class="px-4 py-2 border rounded-lg hover:bg-slate-100 text-sm font-semibold text-slate-600">&larr; Kembali</button>
+                    <button onclick="switchTab('simulation')" class="px-5 py-2 bg-accent text-white rounded-lg hover:bg-accentHover text-sm font-semibold shadow">Lanjut ke Simulasi &rarr;</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. MENU SIMULASI INTERAKTIF -->
+        <section id="section-simulation" class="content-section hidden">
+            <div class="glass-card rounded-2xl p-6 md:p-8 shadow-md space-y-6">
+                <div class="border-b pb-4">
+                    <h2 class="text-2xl font-bold text-primary flex items-center space-x-2">
+                        <span>🧪</span> <span>Simulasi Segitiga Interaktif</span>
+                    </h2>
+                    <p class="text-slate-600 text-sm mt-1">Geser slider besar sudut untuk mengamati perubahan panjang sisi dan nilai trigonometrinya secara *real-time*.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    <!-- Control & Realtime Values (Left Column) -->
+                    <div class="lg:col-span-5 space-y-6 bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                        
+                        <!-- Slider Input -->
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <label for="angleSlider" class="font-bold text-slate-800 text-sm sm:text-base">Besar Sudut (&theta;):</label>
+                                <span id="angleValueDisplay" class="text-2xl font-extrabold text-accent bg-orange-100 px-3 py-1 rounded-lg">30&deg;</span>
+                            </div>
+                            <input type="range" id="angleSlider" min="5" max="85" value="30" step="1" 
+                                   class="w-full h-3 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-accent"
+                                   oninput="updateSimulation()">
+                            <div class="flex justify-between text-xs text-slate-400 mt-1 font-mono">
+                                <span>5&deg;</span>
+                                <span>30&deg;</span>
+                                <span>45&deg;</span>
+                                <span>60&deg;</span>
+                                <span>85&deg;</span>
+                            </div>
+                        </div>
+
+                        <!-- Fixed Hypotenuse Info -->
+                        <div class="p-3 bg-blue-100/60 rounded-xl text-xs text-blue-900 border border-blue-200">
+                            * Hipotenusa (Sisi Miring) dijaga konstan: <strong>r = 100 unit</strong>.
+                        </div>
+
+                        <!-- Side Length Results -->
+                        <div class="space-y-2 text-sm font-medium">
+                            <h4 class="font-bold text-slate-700 text-xs uppercase tracking-wider">Panjang Sisi Segitiga:</h4>
+                            <div class="flex justify-between p-2.5 bg-white rounded-lg border">
+                                <span class="text-red-600 font-semibold">Sisi Depan (de):</span>
+                                <span id="val-de" class="font-mono font-bold">50.0</span>
+                            </div>
+                            <div class="flex justify-between p-2.5 bg-white rounded-lg border">
+                                <span class="text-green-600 font-semibold">Sisi Samping (sa):</span>
+                                <span id="val-sa" class="font-mono font-bold">86.6</span>
+                            </div>
+                            <div class="flex justify-between p-2.5 bg-white rounded-lg border">
+                                <span class="text-blue-600 font-semibold">Sisi Miring (mi):</span>
+                                <span id="val-mi" class="font-mono font-bold">100.0</span>
+                            </div>
+                        </div>
+
+                        <!-- Dynamic Trigonometric Ratios -->
+                        <div class="space-y-3 pt-2">
+                            <h4 class="font-bold text-slate-700 text-xs uppercase tracking-wider">Nilai Perbandingan:</h4>
+                            
+                            <div class="p-3 bg-blue-50 rounded-xl border border-blue-200">
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="font-bold text-blue-800">Sin &theta; = de / mi</span>
+                                    <span id="calc-sin-ratio" class="text-xs text-slate-500 font-mono">50.0 / 100</span>
+                                </div>
+                                <div class="text-right text-xl font-extrabold text-blue-700 font-mono mt-1" id="res-sin">0.500</div>
+                            </div>
+
+                            <div class="p-3 bg-green-50 rounded-xl border border-green-200">
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="font-bold text-green-800">Cos &theta; = sa / mi</span>
+                                    <span id="calc-cos-ratio" class="text-xs text-slate-500 font-mono">86.6 / 100</span>
+                                </div>
+                                <div class="text-right text-xl font-extrabold text-green-700 font-mono mt-1" id="res-cos">0.866</div>
+                            </div>
+
+                            <div class="p-3 bg-orange-50 rounded-xl border border-orange-200">
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="font-bold text-orange-800">Tan &theta; = de / sa</span>
+                                    <span id="calc-tan-ratio" class="text-xs text-slate-500 font-mono">50.0 / 86.6</span>
+                                </div>
+                                <div class="text-right text-xl font-extrabold text-orange-700 font-mono mt-1" id="res-tan">0.577</div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Canvas Graphic Output (Right Column) -->
+                    <div class="lg:col-span-7 flex flex-col items-center justify-center space-y-4">
+                        <div class="w-full relative bg-white p-4 rounded-2xl border shadow-inner flex flex-col items-center">
+                            <canvas id="sim-canvas" class="w-full h-80 max-w-lg"></canvas>
+                        </div>
+
+                        <!-- Dynamic Explanation Box -->
+                        <div id="sim-explanation" class="w-full p-4 bg-blue-50 border border-blue-200 rounded-xl text-sm text-slate-700 leading-relaxed">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. MENU LATIHAN -->
+        <section id="section-practice" class="content-section hidden">
+            <div class="glass-card rounded-2xl p-6 md:p-8 shadow-md space-y-6">
+                <div class="border-b pb-4 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold text-primary flex items-center space-x-2">
+                            <span>✏️</span> <span>Latihan Soal Interaktif</span>
+                        </h2>
+                        <p class="text-slate-600 text-sm mt-1">Uji pemahaman awal Anda pada 5 soal interaktif berikut.</p>
+                    </div>
+                    <span id="practice-progress" class="text-xs font-bold bg-blue-100 text-primary px-3 py-1 rounded-full">Soal 1 dari 5</span>
+                </div>
+
+                <!-- Container Soal Latihan -->
+                <div id="practice-container" class="space-y-6">
+                    <!-- Loaded dynamically via JavaScript -->
+                </div>
+
+                <!-- Navigation Controls for Practice -->
+                <div class="flex justify-between items-center pt-4 border-t">
+                    <button id="btn-prev-practice" onclick="prevPracticeQuestion()" class="px-4 py-2 border rounded-lg hover:bg-slate-100 text-sm font-semibold disabled:opacity-50">Sebelumnnya</button>
+                    <button id="btn-next-practice" onclick="nextPracticeQuestion()" class="px-5 py-2 bg-primary text-white rounded-lg hover:bg-blue-800 text-sm font-semibold shadow">Selanjutnya &rarr;</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. MENU EVALUASI -->
+        <section id="section-evaluation" class="content-section hidden">
+            <div class="glass-card rounded-2xl p-6 md:p-8 shadow-md space-y-6">
+                <div class="border-b pb-4 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold text-primary flex items-center space-x-2">
+                            <span>📝</span> <span>Evaluasi Hasil Belajar</span>
+                        </h2>
+                        <p class="text-slate-600 text-sm mt-1">10 Soal pilihan ganda untuk mengukur tingkat penguasaan materi Anda.</p>
+                    </div>
+                </div>
+
+                <!-- Evaluation Quiz Interface -->
+                <div id="eval-quiz-box" class="space-y-6">
+                    <div class="flex justify-between items-center bg-blue-50 p-3 rounded-xl text-sm font-semibold text-primary">
+                        <span id="eval-question-number">Soal Nomor 1 dari 10</span>
+                        <span id="eval-answered-count" class="text-xs bg-white px-2 py-1 rounded shadow-sm text-slate-600">Dijawab: 0 / 10</span>
+                    </div>
+
+                    <div id="eval-question-content" class="bg-white p-6 rounded-2xl border space-y-4">
+                        <!-- Dynamic Question HTML -->
+                    </div>
+
+                    <div id="eval-options-content" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <!-- Dynamic Options HTML -->
+                    </div>
+
+                    <div class="flex justify-between items-center pt-4 border-t">
+                        <button id="btn-eval-prev" onclick="prevEvalQuestion()" class="px-4 py-2 border rounded-lg hover:bg-slate-100 text-sm font-semibold disabled:opacity-50">Kembali</button>
+                        <button id="btn-eval-next" onclick="nextEvalQuestion()" class="px-5 py-2 bg-primary text-white rounded-lg hover:bg-blue-800 text-sm font-semibold shadow">Selanjutnya</button>
+                        <button id="btn-eval-submit" onclick="submitEvaluation()" class="hidden px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg shadow-lg">Selesai & Sampaikan Skor</button>
+                    </div>
+                </div>
+
+                <!-- Evaluation Score Result View (Initially Hidden) -->
+                <div id="eval-result-box" class="hidden text-center space-y-6 py-8">
+                    <div class="max-w-md mx-auto bg-white p-8 rounded-3xl border shadow-xl space-y-4">
+                        <div id="result-badge" class="w-24 h-24 rounded-full mx-auto flex items-center justify-center text-4xl shadow-inner bg-green-100 text-green-600">
+                            🏆
+                        </div>
+                        <h3 class="text-2xl font-bold text-slate-800">Hasil Evaluasi Anda</h3>
+                        
+                        <div class="py-4">
+                            <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Skor Akhir</span>
+                            <div id="eval-final-score" class="text-6xl font-black text-primary mt-1">0</div>
+                        </div>
+
+                        <div id="eval-status-msg" class="p-4 rounded-xl text-sm font-semibold">
+                            <!-- Status Message populated via JS -->
+                        </div>
+
+                        <div class="pt-4 flex flex-col sm:flex-row gap-3">
+                            <button onclick="resetEvaluation()" class="w-full py-3 bg-accent hover:bg-accentHover text-white font-bold rounded-xl shadow transition">Ulangi Evaluasi</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 8. MENU PROFIL PENGEMBANG -->
+        <section id="section-profile" class="content-section hidden">
+            <div class="glass-card rounded-2xl p-6 md:p-8 shadow-md max-w-3xl mx-auto space-y-6">
+                <div class="border-b pb-4 text-center">
+                    <h2 class="text-2xl font-bold text-primary">Profil Pengembang Media</h2>
+                    <p class="text-slate-600 text-sm mt-1">Identitas Penyusun Media Pembelajaran Interaktif (MPI)</p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 p-6 bg-slate-50 rounded-2xl border">
+                    <div class="w-28 h-28 bg-gradient-to-tr from-primary to-accent rounded-full flex items-center justify-center text-white font-bold text-4xl shadow-lg border-4 border-white">
+                        👨‍🏫
+                    </div>
+                    <div class="space-y-2 text-center sm:text-left">
+                        <h3 class="text-xl font-bold text-slate-800">Tim Pengembang MPI Matematika</h3>
+                        <p class="text-sm font-semibold text-accent">Pengembang Media & Instructional Designer</p>
+                        <div class="text-xs text-slate-600 space-y-1 pt-2 border-t">
+                            <p><strong>Institusi:</strong> SMA Negeri Indonesia</p>
+                            <p><strong>Mata Pelajaran:</strong> Matematika SMA</p>
+                            <p><strong>Teknologi:</strong> HTML5, CSS3 (Tailwind), JavaScript ES6, Web Canvas API</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-blue-50 border border-blue-200 rounded-xl text-xs text-slate-600 leading-relaxed">
+                    <p class="font-bold text-primary mb-1">Catatan Pengembangan:</p>
+                    <p>Media Pembelajaran Interaktif ini dikembangkan secara modular dan mandiri tanpa ketergantungan pada *framework* eksternal rumit, sehingga menjamin performa cepat, responsif di berbagai ukuran perangkat (laptop, tablet, HP), dan siap digunakan secara langsung dalam pembelajaran kelas maupun mandiri.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-800 text-slate-400 py-4 text-center text-xs mt-8 border-t border-slate-700">
+        <div class="max-w-7xl mx-auto px-4">
+            <p>&copy; 2026 Media Pembelajaran Interaktif (MPI) Trigonometri - SMA Kelas X.</p>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT APPLICATION LOGIC -->
+    <script>
+        /* ==========================================================================
+           1. AUDIO SYNTHESIZER (Web Audio API for zero-external asset reliance)
+           ========================================================================== */
+        const AudioFX = {
+            ctx: null,
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            },
+            playCorrect() {
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, this.ctx.currentTime); // C5
+                osc.frequency.exponentialRampToValueAtTime(659.25, this.ctx.currentTime + 0.15); // E5
+                gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.3);
+            },
+            playWrong() {
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, this.ctx.currentTime); // A3
+                osc.frequency.exponentialRampToValueAtTime(130.81, this.ctx.currentTime + 0.2); // C3
+                gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.3);
+            },
+            playClick() {
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, this.ctx.currentTime);
+                gain.gain.setValueAtTime(0.03, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.05);
+            }
+        };
+
+        /* ==========================================================================
+           2. NAVIGATION & TAB SYSTEM
+           ========================================================================== */
+        function switchTab(tabId) {
+            AudioFX.playClick();
+            
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(sec => {
+                sec.classList.add('hidden');
+            });
+
+            // Show selected section
+            const targetSection = document.getElementById(`section-${tabId}`);
+            if (targetSection) {
+                targetSection.classList.remove('hidden');
+            }
+
+            // Update Tab Button styles (Desktop)
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            const activeNavBtn = document.getElementById(`nav-${tabId}`);
+            if (activeNavBtn) {
+                activeNavBtn.classList.add('active');
+            }
+
+            // Close Mobile Menu if open
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (!mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.add('hidden');
+            }
+
+            // Trigger specific page initializations
+            if (tabId === 'simulation') {
+                setTimeout(updateSimulation, 50);
+            } else if (tabId === 'practice') {
+                renderPracticeQuestion();
+            } else if (tabId === 'evaluation') {
+                renderEvalQuestion();
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleMobileMenu() {
+            AudioFX.playClick();
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        }
+
+        /* ==========================================================================
+           3. SUB-MATERIA NAVIGATION
+           ========================================================================== */
+        function showSubMaterial(subId) {
+            AudioFX.playClick();
+            document.querySelectorAll('.submat-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(subId).classList.remove('hidden');
+
+            document.querySelectorAll('.submat-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-100', 'text-primary');
+                btn.classList.add('bg-slate-100', 'text-slate-600');
+            });
+
+            const activeBtn = document.getElementById(`submat-btn-${subId.split('-')[1]}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-slate-100', 'text-slate-600');
+                activeBtn.classList.add('bg-blue-100', 'text-primary');
+            }
+        }
+
+        /* ==========================================================================
+           4. SIMULATION ENGINE (CANVAS & MATH CALCULATIONS)
+           ========================================================================== */
+        function updateSimulation() {
+            const slider = document.getElementById('angleSlider');
+            const angleDeg = parseFloat(slider.value);
+            const angleRad = (angleDeg * Math.PI) / 180;
+
+            // Display Angle Text
+            document.getElementById('angleValueDisplay').innerText = `${angleDeg}°`;
+
+            // Calculate Trigonometry Values (Hypotenuse = 100 fixed)
+            const mi = 100.0;
+            const de = mi * Math.sin(angleRad);
+            const sa = mi * Math.cos(angleRad);
+
+            const sinVal = Math.sin(angleRad);
+            const cosVal = Math.cos(angleRad);
+            const tanVal = Math.tan(angleRad);
+
+            // Update UI Numerical Displays
+            document.getElementById('val-de').innerText = de.toFixed(1);
+            document.getElementById('val-sa').innerText = sa.toFixed(1);
+            document.getElementById('val-mi').innerText = mi.toFixed(1);
+
+            document.getElementById('calc-sin-ratio').innerText = `${de.toFixed(1)} / 100`;
+            document.getElementById('calc-cos-ratio').innerText = `${sa.toFixed(1)} / 100`;
+            document.getElementById('calc-tan-ratio').innerText = `${de.toFixed(1)} / ${sa.toFixed(1)}`;
+
+            document.getElementById('res-sin').innerText = sinVal.toFixed(3);
+            document.getElementById('res-cos').innerText = cosVal.toFixed(3);
+            document.getElementById('res-tan').innerText = tanVal.toFixed(3);
+
+            // Dynamic Explanatory Text
+            let explanationText = "";
+            if (angleDeg < 30) {
+                explanationText = `Pada sudut kecil (<strong>${angleDeg}&deg;</strong>), sisi depan (de) sangat pendek dibandingkan sisi samping (sa). Sehingga nilai <strong>Sin &theta;</strong> kecil dan <strong>Cos &theta;</strong> mendekati 1.`;
+            } else if (angleDeg === 45) {
+                explanationText = `Pada sudut <strong>45&deg;</strong>, panjang sisi depan (de) sama persis dengan sisi samping (sa). Oleh karena itu, nilai <strong>Tan 45&deg; = 1</strong>!`;
+            } else if (angleDeg > 60) {
+                explanationText = `Pada sudut besar (<strong>${angleDeg}&deg;</strong>), tinggi/sisi depan (de) mendekati panjang hipotenusa. Nilai <strong>Tan &theta;</strong> melonjak sangat tinggi karena pembaginya (sisi samping) makin mengecil.`;
+            } else {
+                explanationText = `Dengan sudut acuan <strong>${angleDeg}&deg;</strong>, perhatikan bagaimana rasio antara sisi-sisi segitiga siku-siku berubah secara konstan mengikuti nilai trigonometrinya.`;
+            }
+            document.getElementById('sim-explanation').innerHTML = `💡 <strong>Analisis Simulasi:</strong> ${explanationText}`;
+
+            // Render Canvas Graphic
+            drawSimulationCanvas(angleRad, de, sa);
+        }
+
+        function drawSimulationCanvas(angleRad, de, sa) {
+            const canvas = document.getElementById('sim-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            // Responsive Adjustments for Canvas Context
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+
+            const width = rect.width;
+            const height = rect.height;
+
+            ctx.clearRect(0, 0, width, height);
+
+            // Scale geometry to fit nicely in canvas padding
+            const margin = 50;
+            const maxDrawWidth = width - margin * 2;
+            const maxDrawHeight = height - margin * 2;
+            const scale = Math.min(maxDrawWidth / 100, maxDrawHeight / 100);
+
+            // Coordinates for Triangle Corners
+            const originX = margin;
+            const originY = height - margin;
+
+            const xRight = originX + sa * scale;
+            const yTop = originY - de * scale;
+
+            // 1. Draw Grid Lines Background
+            ctx.strokeStyle = '#F1F5F9';
+            ctx.lineWidth = 1;
+            for (let x = 0; x < width; x += 20) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
+            }
+            for (let y = 0; y < height; y += 20) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
+            }
+
+            // 2. Fill Triangle Area
+            ctx.beginPath();
+            ctx.moveTo(originX, originY);
+            ctx.lineTo(xRight, originY);
+            ctx.lineTo(xRight, yTop);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(224, 242, 254, 0.5)';
+            ctx.fill();
+
+            // 3. Draw Triangle Edges with Color Coding
+            // Sisi Samping (Green)
+            ctx.beginPath();
+            ctx.moveTo(originX, originY);
+            ctx.lineTo(xRight, originY);
+            ctx.strokeStyle = '#16A34A';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+
+            // Sisi Depan (Red)
+            ctx.beginPath();
+            ctx.moveTo(xRight, originY);
+            ctx.lineTo(xRight, yTop);
+            ctx.strokeStyle = '#DC2626';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+
+            // Sisi Miring (Blue)
+            ctx.beginPath();
+            ctx.moveTo(originX, originY);
+            ctx.lineTo(xRight, yTop);
+            ctx.strokeStyle = '#2563EB';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+
+            // 4. Draw Right Angle Marker
+            const squareSize = 12;
+            ctx.beginPath();
+            ctx.moveTo(xRight - squareSize, originY);
+            ctx.lineTo(xRight - squareSize, originY - squareSize);
+            ctx.lineTo(xRight, originY - squareSize);
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // 5. Draw Angle Arc (&theta;)
+            const arcRadius = 30;
+            ctx.beginPath();
+            ctx.arc(originX, originY, arcRadius, 0, -angleRad, true);
+            ctx.strokeStyle = '#F97316';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // Text Labels on Canvas
+            ctx.fillStyle = '#F97316';
+            ctx.font = 'bold 14px Inter, sans-serif';
+            ctx.fillText('θ', originX + arcRadius + 8, originY - 8);
+
+            ctx.fillStyle = '#16A34A';
+            ctx.font = 'bold 12px Inter, sans-serif';
+            ctx.fillText(`sa (${sa.toFixed(1)})`, originX + (sa * scale) / 2 - 15, originY + 20);
+
+            ctx.fillStyle = '#DC2626';
+            ctx.fillText(`de (${de.toFixed(1)})`, xRight + 10, originY - (de * scale) / 2);
+
+            ctx.fillStyle = '#2563EB';
+            ctx.fillText(`mi (100)`, originX + (sa * scale) / 2 - 25, yTop + (de * scale) / 2 - 10);
+        }
+
+        // Canvas Window Resize Handler
+        window.addEventListener('resize', () => {
+            const simSec = document.getElementById('section-simulation');
+            if (!simSec.classList.contains('hidden')) {
+                updateSimulation();
+            }
+        });
+
+        /* ==========================================================================
+           5. LATIHAN SOAL (PRACTICE) DATA & LOGIC
+           ========================================================================== */
+        const practiceData = [
+            {
+                id: 1,
+                question: "Pada sebuah segitiga siku-siku, sisi yang berada tepat di depan sudut siku-siku (90°) dinamakan...",
+                options: ["Sisi Samping", "Sisi Depan", "Sisi Miring (Hipotenusa)", "Sisi Siku"],
+                answer: 2,
+                explanation: "Sisi miring (hipotenusa) selalu terletak tepat di depan sudut siku-siku (90°) dan merupakan sisi terpanjang pada segitiga siku-siku."
+            },
+            {
+                id: 2,
+                question: "Rumus perbandingan trigonometri untuk Cosinus (&theta;) pada segitiga siku-siku adalah...",
+                options: ["Sisi Depan / Sisi Miring", "Sisi Samping / Sisi Miring", "Sisi Depan / Sisi Samping", "Sisi Miring / Sisi Depan"],
+                answer: 1,
+                explanation: "Cosinus (Cos) dirumuskan sebagai perbandingan antara Sisi Samping dengan Sisi Miring (Cos = sa/mi)."
+            },
+            {
+                id: 3,
+                question: "Jika diketahui panjang sisi depan = 6 cm dan sisi miring = 10 cm, berapakah nilai dari Sin &theta;?",
+                options: ["0,5", "0,6", "0,8", "1,2"],
+                answer: 1,
+                explanation: "Sin &theta; = Depan / Miring = 6 / 10 = 0,6."
+            },
+            {
+                id: 4,
+                question: "Diketahui segitiga siku-siku dengan sisi depan = 3 cm dan sisi samping = 4 cm. Nilai dari Tangen (Tan &theta;) adalah...",
+                options: ["3/4 (0,75)", "4/3 (1,33)", "3/5 (0,60)", "4/5 (0,80)"],
+                answer: 0,
+                explanation: "Tan &theta; = Depan / Samping = 3 / 4 = 0,75."
+            },
+            {
+                id: 5,
+                question: "Jika panjang sisi samping = 8 cm dan sisi miring = 10 cm, berapa panjang sisi depan segitiga siku-siku tersebut menurut teorema Pythagoras?",
+                options: ["5 cm", "6 cm", "7 cm", "12 cm"],
+                answer: 1,
+                explanation: "Dengan Pythagoras: Depan = &radic;(10&sup2; - 8&sup2;) = &radic;(100 - 64) = &radic;36 = 6 cm."
+            }
+        ];
+
+        let currentPracticeIndex = 0;
+        let practiceUserAnswers = Array(practiceData.length).fill(null);
+
+        function renderPracticeQuestion() {
+            const q = practiceData[currentPracticeIndex];
+            document.getElementById('practice-progress').innerText = `Soal ${currentPracticeIndex + 1} dari ${practiceData.length}`;
+
+            let html = `
+                <div class="bg-white p-6 rounded-2xl border space-y-4">
+                    <h3 class="text-lg font-bold text-slate-800">${q.id}. ${q.question}</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+            `;
+
+            q.options.forEach((opt, idx) => {
+                const isSelected = practiceUserAnswers[currentPracticeIndex] === idx;
+                let btnClass = "border bg-slate-50 hover:bg-blue-50 text-slate-700";
+                
+                if (isSelected) {
+                    if (idx === q.answer) {
+                        btnClass = "bg-green-100 border-green-500 text-green-800 font-bold";
+                    } else {
+                        btnClass = "bg-red-100 border-red-500 text-red-800 font-bold";
+                    }
+                }
+
+                html += `
+                    <button onclick="selectPracticeAnswer(${idx})" class="p-4 rounded-xl border text-left transition text-sm flex items-center justify-between ${btnClass}">
+                        <span>${String.fromCharCode(65 + idx)}. ${opt}</span>
+                        ${isSelected ? (idx === q.answer ? '<span>✅</span>' : '<span>❌</span>') : ''}
+                    </button>
+                `;
+            });
+
+            html += `</div></div>`;
+
+            // Feedback & Explanation Box
+            if (practiceUserAnswers[currentPracticeIndex] !== null) {
+                const isCorrect = practiceUserAnswers[currentPracticeIndex] === q.answer;
+                html += `
+                    <div class="p-4 rounded-xl text-sm border ${isCorrect ? 'bg-green-50 border-green-200 text-green-900' : 'bg-red-50 border-red-200 text-red-900'} space-y-1">
+                        <p class="font-bold flex items-center space-x-2">
+                            <span>${isCorrect ? '🎉 Jawaban Benar!' : '⚠️ Jawaban Kurang Tepat!'}</span>
+                        </p>
+                        <p class="text-xs text-slate-600 mt-1"><strong>Pembahasan:</strong> ${q.explanation}</p>
+                    </div>
+                `;
+            }
+
+            document.getElementById('practice-container').innerHTML = html;
+
+            // Nav Buttons enable/disable
+            document.getElementById('btn-prev-practice').disabled = currentPracticeIndex === 0;
+            document.getElementById('btn-next-practice').innerText = (currentPracticeIndex === practiceData.length - 1) ? 'Selesai Latihan' : 'Selanjutnya →';
+        }
+
+        function selectPracticeAnswer(optIdx) {
+            practiceUserAnswers[currentPracticeIndex] = optIdx;
+            if (optIdx === practiceData[currentPracticeIndex].answer) {
+                AudioFX.playCorrect();
+            } else {
+                AudioFX.playWrong();
+            }
+            renderPracticeQuestion();
+        }
+
+        function nextPracticeQuestion() {
+            AudioFX.playClick();
+            if (currentPracticeIndex < practiceData.length - 1) {
+                currentPracticeIndex++;
+                renderPracticeQuestion();
+            } else {
+                switchTab('evaluation');
+            }
+        }
+
+        function prevPracticeQuestion() {
+            AudioFX.playClick();
+            if (currentPracticeIndex > 0) {
+                currentPracticeIndex--;
+                renderPracticeQuestion();
+            }
+        }
+
+        /* ==========================================================================
+           6. EVALUASI (EVALUATION) DATA & LOGIC
+           ========================================================================== */
+        const evaluationData = [
+            {
+                question: "Trigonometri berasal dari bahasa Yunani 'Trigonon' dan 'Metron' yang berarti...",
+                options: ["Pengukuran Tiga Sudut", "Perhitungan Luas Segitiga", "Pemetaan Garis Lurus", "Perbandingan Panjang Sisi"],
+                answer: 0
+            },
+            {
+                question: "Sisi miring pada segitiga siku-siku juga dikenal dengan istilah...",
+                options: ["Absis", "Ordinat", "Hipotenusa", "Diagonalis"],
+                answer: 2
+            },
+            {
+                question: "Jika sudut acuan &theta; terletak pada alas segitiga, maka sisi tegak vertikal di depan &theta; disebut...",
+                options: ["Sisi Samping", "Sisi Depan", "Sisi Miring", "Sisi Siku"],
+                answer: 1
+            },
+            {
+                question: "Rumus perbandingan untuk Sinus (&theta;) adalah...",
+                options: ["Depan / Samping", "Samping / Miring", "Depan / Miring", "Miring / Samping"],
+                answer: 2
+            },
+            {
+                question: "Manakah perbandingan yang tepat untuk Tangen (&theta;)?",
+                options: ["Sin &theta; / Cos &theta;", "Cos &theta; / Sin &theta;", "Samping / Depan", "Miring / Depan"],
+                answer: 0
+            },
+            {
+                question: "Diketahui segitiga siku-siku dengan sisi depan = 5 cm dan sisi miring = 13 cm. Berapakah panjang sisi sampingnya?",
+                options: ["8 cm", "10 cm", "12 cm", "15 cm"],
+                answer: 2
+            },
+            {
+                question: "Berdasarkan soal nomor 6, berapakah nilai Cosinus (&theta;)?",
+                options: ["5/13", "12/13", "5/12", "12/5"],
+                answer: 1
+            },
+            {
+                question: "Nilai dari Tangen 45° pada segitiga siku-siku sama kaki adalah...",
+                options: ["0", "0,5", "1", "&infin;"],
+                answer: 2
+            },
+            {
+                question: "Sebuah tangga sepanjang 5 meter disandarkan pada dinding. Jika jarak ujung bawah tangga ke dinding adalah 3 meter, maka tinggi dinding yang dicapai tangga adalah...",
+                options: ["3 meter", "4 meter", "4,5 meter", "5 meter"],
+                answer: 1
+            },
+            {
+                question: "Berdasarkan posisi tangga pada soal nomor 9, berapakah nilai Sinus sudut antara tangga dengan lantai?",
+                options: ["3/5", "4/5", "3/4", "4/3"],
+                answer: 1
+            }
+        ];
+
+        let evalCurrentIndex = 0;
+        let evalAnswers = Array(evaluationData.length).fill(null);
+
+        function renderEvalQuestion() {
+            const q = evaluationData[evalCurrentIndex];
+            
+            document.getElementById('eval-question-number').innerText = `Soal Nomor ${evalCurrentIndex + 1} dari ${evaluationData.length}`;
+            
+            const answeredCount = evalAnswers.filter(a => a !== null).length;
+            document.getElementById('eval-answered-count').innerText = `Dijawab: ${answeredCount} / ${evaluationData.length}`;
+
+            // Question Text
+            document.getElementById('eval-question-content').innerHTML = `
+                <h3 class="text-base sm:text-lg font-bold text-slate-800 leading-relaxed">${evalCurrentIndex + 1}. ${q.question}</h3>
+            `;
+
+            // Options
+            let optionsHtml = "";
+            q.options.forEach((opt, idx) => {
+                const isSelected = evalAnswers[evalCurrentIndex] === idx;
+                const borderClass = isSelected ? "border-accent bg-orange-50 font-bold text-accent" : "border-slate-200 bg-white hover:bg-blue-50 text-slate-700";
+
+                optionsHtml += `
+                    <button onclick="selectEvalAnswer(${idx})" class="p-4 rounded-xl border text-left text-sm transition flex items-center space-x-3 ${borderClass}">
+                        <span class="w-6 h-6 rounded-full border flex items-center justify-center text-xs ${isSelected ? 'bg-accent text-white border-accent' : 'border-slate-300'}">${String.fromCharCode(65 + idx)}</span>
+                        <span>${opt}</span>
+                    </button>
+                `;
+            });
+
+            document.getElementById('eval-options-content').innerHTML = optionsHtml;
+
+            // Nav Controls
+            document.getElementById('btn-eval-prev').disabled = evalCurrentIndex === 0;
+            
+            if (evalCurrentIndex === evaluationData.length - 1) {
+                document.getElementById('btn-eval-next').classList.add('hidden');
+                document.getElementById('btn-eval-submit').classList.remove('hidden');
+            } else {
+                document.getElementById('btn-eval-next').classList.remove('hidden');
+                document.getElementById('btn-eval-submit').classList.add('hidden');
+            }
+        }
+
+        function selectEvalAnswer(optIdx) {
+            AudioFX.playClick();
+            evalAnswers[evalCurrentIndex] = optIdx;
+            renderEvalQuestion();
+        }
+
+        function nextEvalQuestion() {
+            AudioFX.playClick();
+            if (evalCurrentIndex < evaluationData.length - 1) {
+                evalCurrentIndex++;
+                renderEvalQuestion();
+            }
+        }
+
+        function prevEvalQuestion() {
+            AudioFX.playClick();
+            if (evalCurrentIndex > 0) {
+                evalCurrentIndex--;
+                renderEvalQuestion();
+            }
+        }
+
+        function submitEvaluation() {
+            AudioFX.playClick();
+            
+            const unanswered = evalAnswers.filter(a => a === null).length;
+            if (unanswered > 0) {
+                if (!confirm(`Masih ada ${unanswered} soal yang belum dijawab. Yakin ingin mengumpulkan?`)) {
+                    return;
+                }
+            }
+
+            // Calculate Score
+            let correctCount = 0;
+            evalAnswers.forEach((ans, idx) => {
+                if (ans === evaluationData[idx].answer) {
+                    correctCount++;
+                }
+            });
+
+            const score = Math.round((correctCount / evaluationData.length) * 100);
+
+            // Hide Quiz Box, Show Result Box
+            document.getElementById('eval-quiz-box').classList.add('hidden');
+            document.getElementById('eval-result-box').classList.remove('hidden');
+
+            document.getElementById('eval-final-score').innerText = score;
+
+            const badgeEl = document.getElementById('result-badge');
+            const msgEl = document.getElementById('eval-status-msg');
+
+            if (score >= 75) {
+                AudioFX.playCorrect();
+                badgeEl.className = "w-24 h-24 rounded-full mx-auto flex items-center justify-center text-4xl shadow-inner bg-green-100 text-green-600";
+                badgeEl.innerText = "🏆";
+                msgEl.className = "p-4 rounded-xl text-sm font-semibold bg-green-100 text-green-800 border border-green-200";
+                msgEl.innerHTML = "<strong>Sangat Baik!</strong> Anda telah menguasai konsep perbandingan trigonometri dengan sangat baik.";
+            } else {
+                AudioFX.playWrong();
+                badgeEl.className = "w-24 h-24 rounded-full mx-auto flex items-center justify-center text-4xl shadow-inner bg-orange-100 text-orange-600";
+                badgeEl.innerText = "📚";
+                msgEl.className = "p-4 rounded-xl text-sm font-semibold bg-orange-100 text-orange-800 border border-orange-200";
+                msgEl.innerHTML = "<strong>Perlu Latihan Lagi!</strong> Pelajari kembali materi dan pelajari simulasi interaktif untuk memperkuat pemahaman.";
+            }
+        }
+
+        function resetEvaluation() {
+            AudioFX.playClick();
+            evalCurrentIndex = 0;
+            evalAnswers = Array(evaluationData.length).fill(null);
+            document.getElementById('eval-result-box').classList.add('hidden');
+            document.getElementById('eval-quiz-box').classList.remove('hidden');
+            renderEvalQuestion();
+        }
+
+        /* ==========================================================================
+           7. INITIALIZATION ON WINDOW LOAD
+           ========================================================================== */
+        window.onload = function() {
+            // Default to Home View
+            switchTab('home');
+        };
+    </script>
+</body>
+</html>
